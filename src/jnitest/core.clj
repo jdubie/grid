@@ -1,5 +1,7 @@
 (ns jnitest.core
   (:require
+    [jnitest.snake :as snake]
+    [jnitest.agent :as agent]
     [clojure.java.io :as io])
   (:import
     [java.net InetAddress DatagramPacket DatagramSocket]
@@ -96,11 +98,30 @@
          (map int))))
 
 (defn rainbox-matrix
-  []
-  (->matrix (fn [x _]
-              (degree->color (/ (* 2 360 x) 32)))))
+  ([] (rainbox-matrix 0))
+  ([x']
+   (->matrix (fn [x _]
+               (degree->color (/ (* 2 360 (+ x x')) 32))))))
 
 (defn send-random
   []
   (send-matrix (random-matrix)))
 
+(defn rainbox-animation
+  []
+  (doseq [x (range 100)]
+    (Thread/sleep 10)
+    (send-matrix (rainbox-matrix x))))
+
+(defn s
+  []
+  (loop [state (snake/init {:width 32 :height 32})]
+    (Thread/sleep 10)
+    (send-matrix (snake/render state))
+    (if (:dead? state)
+      (recur (snake/init {:width 32 :height 32}))
+      (recur (snake/tick state (agent/best-action state))))))
+
+(defn clear
+  []
+  (send-buf (byte-array (repeat (* 32 32 3) 0))))
