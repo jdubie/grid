@@ -1,6 +1,6 @@
-(ns jnitest.agent
+(ns grid.agent
   (:require
-    [jnitest.snake :as model]))
+    [grid.snake :as model]))
 
 (defn score
   [{:keys [body food dead?]}]

@@ -1,4 +1,4 @@
-(ns jnitest.snake)
+(ns grid.snake)
 
 (defn rand-food
   [{:keys [width height]}]

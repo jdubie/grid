@@ -1,7 +1,9 @@
-(ns jnitest.core
+(ns grid.core
   (:require
-    [jnitest.snake :as snake]
-    [jnitest.agent :as agent]
+    [grid.snake :as snake]
+    [grid.agent :as agent]
+    [clojure.string :as string]
+    [clojure.java.shell :refer [sh]]
     [clojure.java.io :as io])
   (:import
     [java.net InetAddress DatagramPacket DatagramSocket]
@@ -28,8 +30,24 @@
     (.drawImage (.getGraphics bufferedThumbnail) thumbnail 0 0 nil)
     bufferedThumbnail))
 
+(defn find-raspberry-pi
+  []
+  (let [laptop-ip (.getCanonicalHostName (InetAddress/getLocalHost))
+        cmd (conj (string/split "nmap -p T:22" #" ") (format "%s/24" laptop-ip))
+        ;; you must have nmap installed
+        result (apply sh cmd)]
+    result))
+
+(comment
+  (map (fn [s] (let [split (string/split s #"\n")
+                     ip (last (string/split (first split) #" "))
+                     open? (some? (re-find #"open" (last split)))]
+                 {:ip ip
+                  :ssh-open? open?}))
+       (rest (pop (string/split (:out r) #"\n\n")))))
+
 (defonce client (DatagramSocket. 3002))
-(defonce ip (InetAddress/getByName "192.168.0.18"))
+(def ip (InetAddress/getByName "192.168.1.46"))
 
 (defn send-buf
   [buf]
