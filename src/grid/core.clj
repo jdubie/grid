@@ -17,7 +17,7 @@
   (let [sourceImage (ImageIO/read (io/file path))
         tx (AffineTransform.)
         _ (.rotate tx
-                   -1.5708
+                   0 ;1.5708
                    (/ (.getWidth sourceImage) 2)
                    (/ (.getHeight sourceImage) 2))
         op (AffineTransformOp. tx AffineTransformOp/TYPE_BILINEAR)
