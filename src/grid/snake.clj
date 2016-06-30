@@ -66,7 +66,7 @@
               (fn [y]
                 (let [color (cond
                               (contains? body [x y]) [255 0 0]
-                              (= food [x y]) [0 50 200]
+                              (= food [x y]) [0 255 0]
                               :else (if dead? [100 100 100] [0 0 0]))]
                   color))
               (range height)))

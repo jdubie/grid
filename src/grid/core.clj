@@ -12,17 +12,17 @@
     [java.awt.image BufferedImage AffineTransformOp]
     [java.awt.geom AffineTransform]))
 
-(defn ->32x32
-  [path]
-  (let [sourceImage (ImageIO/read (io/file path))
-        tx (AffineTransform.)
+(defn img->img32x32
+  [src-img]
+  (let [tx (AffineTransform.)
         _ (.rotate tx
-                   0 ;1.5708
-                   (/ (.getWidth sourceImage) 2)
-                   (/ (.getHeight sourceImage) 2))
+                   Math/PI
+                   ;0 ;1.5708
+                   (/ (.getWidth src-img) 2)
+                   (/ (.getHeight src-img) 2))
         op (AffineTransformOp. tx AffineTransformOp/TYPE_BILINEAR)
-        sourceImage (.filter op sourceImage nil)
-        thumbnail (.getScaledInstance sourceImage 32 -1 Image/SCALE_SMOOTH)
+        sourceImage (.filter op src-img nil)
+        thumbnail (.getScaledInstance sourceImage 32 32 Image/SCALE_SMOOTH)
         bufferedThumbnail (BufferedImage.
                             (.getWidth thumbnail nil)
                             (.getHeight thumbnail nil)
@@ -83,18 +83,31 @@
     (send-matrix (->matrix (fn [x y] (if (contains? b [x y])
                                        [255 0 0]
                                        [0 0 0]))))
-    (Thread/sleep 100)))
+    (Thread/sleep 10)))
 
-(defn img-path->matrix
-  [path]
-  (let [i (->32x32 path)]
-    (->matrix (fn [x y]
-                (let [c (Color. (.getRGB i x y))]
-                  [(.getRed c) (.getGreen c) (.getBlue c)])))))
+(defn img->matrix
+  [i]
+  (->matrix (fn [x y]
+              (let [c (Color. (.getRGB i x y))]
+                [(.getRed c) (.getGreen c) (.getBlue c)]))))
 
 (defn send-img
   [path]
-  (send-matrix (img-path->matrix path)))
+  (-> (io/file path)
+      (ImageIO/read)
+      (img->img32x32)
+      (img->matrix)
+      (send-matrix)))
+
+(defn send-gif
+  [path]
+  (let [a (ImageIO/read (io/file path))
+        reader (.next (ImageIO/getImageReadersByFormatName "gif"))
+        ciis (ImageIO/createImageInputStream (io/file "resources/parrot.gif"))c
+        _ (.setInput reader ciis false)
+        noi (.getNumImages reader true)]
+    (doseq [i (range noi)]
+      (let [img (.read reader 0)]))))
 
 (defn random-matrix
   []

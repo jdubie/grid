@@ -10,7 +10,9 @@
           distance (let [x (- (first (last body)) (first food))
                          y (- (last (last body)) (last food))]
                      (+ (* y y) (* x x)))]
-      (+ (* 10 length) (/ 1 distance)))))
+      (case distance
+        0 Long/MAX_VALUE
+        (+ (* 10 length) (/ 1 distance))))))
 
 (def actions [:up :down :left :right])
 
